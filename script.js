@@ -55,6 +55,8 @@ function init() {
     mixer = new THREE.AnimationMixer(player);
     if (gltf.animations.length > 0) {
       mixer.clipAction(gltf.animations[0]).play();
+    } else {
+      console.warn("No animations found in GLTF model");
     }
 
     loader.load('assets/road.glb', gltf2 => {
@@ -83,20 +85,18 @@ function animate() {
 
     if (jump && !isJumping) {
       isJumping = true;
-      let jumpHeight = 0;
-      let up = true;
+      let velocity = 0.2;
       let jumpInterval = setInterval(() => {
-        if (up) {
-          player.position.y += 0.1;
-          jumpHeight += 0.1;
-          if (jumpHeight >= 1.2) up = false;
+        if (player.position.y < 1.2) {
+          player.position.y += velocity;
+          velocity -= 0.01; // Gravity effect
         } else {
-          player.position.y -= 0.1;
-          if (player.position.y <= 0) {
-            player.position.y = 0;
-            isJumping = false;
-            clearInterval(jumpInterval);
-          }
+          velocity = -0.2; // Start falling
+        }
+        if (player.position.y <= 0) {
+          player.position.y = 0;
+          isJumping = false;
+          clearInterval(jumpInterval);
         }
       }, 16);
     }
@@ -205,3 +205,12 @@ function endGame() {
   document.getElementById('game-over').classList.add('active');
   bgMusic.pause();
 }
+
+// Add resize handler
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+window.addEventListener('resize', onWindowResize);
+
