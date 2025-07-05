@@ -31,9 +31,12 @@ body {
 }
 
 #gameCanvas {
-  display: block;
+  display: none; /* ✅ Hidden until game starts */
   background-color: black;
   outline: none;
+  width: 100vw;
+  height: 100vh;
+  touch-action: none;
 }
 
 select, button, label {
