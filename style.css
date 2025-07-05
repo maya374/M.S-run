@@ -32,8 +32,6 @@ body {
 
 #gameCanvas {
   display: block;
-  width: 100vw;
-  height: 100vh;
   background-color: black;
   outline: none;
 }
@@ -55,6 +53,7 @@ button {
 
 button:hover {
   background-color: #218838;
+  transform: scale(1.05);
 }
 
 select {
@@ -89,6 +88,10 @@ body.dark {
   color: #eee;
 }
 
+body.dark .screen {
+  background: rgba(20, 20, 20, 0.9);
+}
+
 body.dark select {
   background-color: #222;
   color: #fff;
@@ -101,4 +104,5 @@ body.dark button {
 
 body.dark button:hover {
   background-color: #666;
+  transform: scale(1.05);
 }
