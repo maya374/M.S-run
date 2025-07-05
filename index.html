@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Temple Run: Maya Edition</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="start-screen" class="screen active">
+    <h1>Temple Run: Maya Edition</h1>
+    
+    <label>Select Character:</label>
+    <select id="characterSelect">
+      <option value="player1.glb">Runner 1</option>
+      <option value="player2.glb">Runner 2</option>
+      <option value="player3.glb">Runner 3</option>
+    </select>
+
+    <label>Select Theme:</label>
+    <select id="themeSelect">
+      <option value="jungle.jpg">Jungle</option>
+      <option value="temple.jpg">Temple</option>
+      <option value="lava.jpg">Lava</option>
+    </select>
+
+    <button id="startBtn">Start Game</button>
+    <label><input type="checkbox" id="darkToggle" /> Dark Mode</label>
+  </div>
+
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="game-over" class="screen">
+    <h2>Game Over</h2>
+    <p>Score: <span id="finalScore">0</span></p>
+    <button onclick="location.reload()">Restart</button>
+  </div>
+
+  <audio id="bgMusic" src="assets/music.mp3" loop></audio>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
