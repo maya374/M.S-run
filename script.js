@@ -23,6 +23,7 @@ function startGame() {
   selectedCharacter = document.getElementById('characterSelect').value;
   selectedTheme = document.getElementById('themeSelect').value;
   document.getElementById('start-screen').classList.remove('active');
+  bgMusic.volume = 0.5;
   bgMusic.play();
   init();
 }
@@ -41,12 +42,12 @@ function init() {
   scene.add(ambientLight);
 
   const textureLoader = new THREE.TextureLoader();
-  textureLoader.load(`assets/${selectedTheme}`, function (texture) {
+  textureLoader.load(`assets/${selectedTheme}`, texture => {
     scene.background = texture;
   });
 
   const loader = new GLTFLoader();
-  loader.load(`assets/${selectedCharacter}`, function (gltf) {
+  loader.load(`assets/${selectedCharacter}`, gltf => {
     player = gltf.scene;
     player.position.set(0, 0, 0);
     scene.add(player);
@@ -56,18 +57,17 @@ function init() {
       mixer.clipAction(gltf.animations[0]).play();
     }
 
-    loader.load('assets/road.glb', function (gltf) {
-      road = gltf.scene;
+    loader.load('assets/road.glb', gltf2 => {
+      road = gltf2.scene;
       road.position.set(0, -1, 0);
       scene.add(road);
 
-      // Start the game loop and spawns AFTER all assets are loaded
       animate();
       spawnObstacles();
       spawnCoins();
       setupControls();
-    });
-  });
+    }, undefined, err => console.error("Failed to load road:", err));
+  }, undefined, err => console.error("Failed to load player:", err));
 }
 
 function animate() {
@@ -101,21 +101,31 @@ function animate() {
       }, 16);
     }
 
-    obstacles.forEach(obs => {
+    obstacles = obstacles.filter(obs => {
       obs.position.z += 0.1;
       if (obs.position.distanceTo(player.position) < 0.5) {
         endGame();
       }
+      if (obs.position.z > player.position.z + 10) {
+        scene.remove(obs);
+        return false;
+      }
+      return true;
     });
 
-    coins.forEach((coin, index) => {
+    coins = coins.filter((coin, index) => {
       coin.rotation.y += 0.1;
       coin.position.z += 0.1;
       if (coin.position.distanceTo(player.position) < 0.5) {
         score += 10;
         scene.remove(coin);
-        coins.splice(index, 1);
+        return false;
       }
+      if (coin.position.z > player.position.z + 10) {
+        scene.remove(coin);
+        return false;
+      }
+      return true;
     });
   }
 
@@ -126,13 +136,13 @@ function spawnObstacles() {
   const loader = new GLTFLoader();
   obstacleInterval = setInterval(() => {
     if (gameOver || !player) return;
-    loader.load('assets/obstacle.glb', function (gltf) {
+    loader.load('assets/obstacle.glb', gltf => {
       let obs = gltf.scene;
       let x = [-1.5, 0, 1.5][Math.floor(Math.random() * 3)];
       obs.position.set(x, 0, player.position.z - 20);
       scene.add(obs);
       obstacles.push(obs);
-    });
+    }, undefined, err => console.error("Failed to load obstacle:", err));
   }, 2000);
 }
 
@@ -140,50 +150,50 @@ function spawnCoins() {
   const loader = new GLTFLoader();
   coinInterval = setInterval(() => {
     if (gameOver || !player) return;
-    loader.load('assets/coin.glb', function (gltf) {
+    loader.load('assets/coin.glb', gltf => {
       let coin = gltf.scene;
       let x = [-1.5, 0, 1.5][Math.floor(Math.random() * 3)];
       coin.position.set(x, 0.5, player.position.z - 20);
       scene.add(coin);
       coins.push(coin);
-    });
+    }, undefined, err => console.error("Failed to load coin:", err));
   }, 1500);
 }
 
 function setupControls() {
-  window.addEventListener('keydown', (e) => {
+  window.addEventListener('keydown', e => {
     if (e.key === 'ArrowLeft') moveLeft = true;
     if (e.key === 'ArrowRight') moveRight = true;
     if (e.key === 'ArrowUp') jump = true;
   });
 
-  window.addEventListener('keyup', (e) => {
+  window.addEventListener('keyup', e => {
     if (e.key === 'ArrowLeft') moveLeft = false;
     if (e.key === 'ArrowRight') moveRight = false;
     if (e.key === 'ArrowUp') jump = false;
   });
 
   let touchStartX = 0;
-  let touchEndX = 0;
 
   window.addEventListener('touchstart', e => {
     if (e.touches.length === 2) {
       jump = true;
     } else {
+      jump = false;
       touchStartX = e.changedTouches[0].screenX;
     }
   });
 
   window.addEventListener('touchend', e => {
     jump = false;
-    if (e.changedTouches.length === 1) {
-      touchEndX = e.changedTouches[0].screenX;
-      let diff = touchEndX - touchStartX;
-      if (diff > 50) moveRight = true;
-      else if (diff < -50) moveLeft = true;
-
-      setTimeout(() => { moveLeft = false; moveRight = false; }, 200);
-    }
+    let touchEndX = e.changedTouches[0].screenX;
+    let diff = touchEndX - touchStartX;
+    if (diff > 50) moveRight = true;
+    else if (diff < -50) moveLeft = true;
+    setTimeout(() => {
+      moveLeft = false;
+      moveRight = false;
+    }, 200);
   });
 }
 
@@ -195,4 +205,3 @@ function endGame() {
   document.getElementById('game-over').classList.add('active');
   bgMusic.pause();
 }
-
