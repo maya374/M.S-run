@@ -23,6 +23,7 @@ function startGame() {
   selectedCharacter = document.getElementById('characterSelect').value;
   selectedTheme = document.getElementById('themeSelect').value;
   document.getElementById('start-screen').classList.remove('active');
+  canvas.style.display = 'block';  // ✅ SHOW CANVAS
   bgMusic.volume = 0.5;
   bgMusic.play();
   init();
@@ -55,8 +56,6 @@ function init() {
     mixer = new THREE.AnimationMixer(player);
     if (gltf.animations.length > 0) {
       mixer.clipAction(gltf.animations[0]).play();
-    } else {
-      console.warn("No animations found in GLTF model");
     }
 
     loader.load('assets/road.glb', gltf2 => {
@@ -89,9 +88,9 @@ function animate() {
       let jumpInterval = setInterval(() => {
         if (player.position.y < 1.2) {
           player.position.y += velocity;
-          velocity -= 0.01; // Gravity effect
+          velocity -= 0.01;
         } else {
-          velocity = -0.2; // Start falling
+          velocity = -0.2;
         }
         if (player.position.y <= 0) {
           player.position.y = 0;
@@ -206,7 +205,6 @@ function endGame() {
   bgMusic.pause();
 }
 
-// Add resize handler
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
